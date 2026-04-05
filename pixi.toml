@@ -1,0 +1,14 @@
+[workspace]
+authors = ["nedjar.prn@gmail.com <nedjar.prn@gmail.com>"]
+channels = ["conda-forge"]
+name = "interactions"
+platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+numpy = ">=2.4.3,<3"
+ipykernel = ">=7.2.0,<8"
+matplotlib = ">=3.10.8,<4"
+pre-commit = ">=4.5.1,<5"
