@@ -76,4 +76,8 @@ class DrosselSchwablForestFire:
             x, y = random.choice(trees)
             self.grid[y][x] = self.FIRE
 
+    def count_burning(self):
+        """Nombre de cellules actuellement en feu."""
+        return sum(cell == self.FIRE for row in self.grid for cell in row)
+
   
