@@ -4,11 +4,11 @@ from typing import Callable, List, Tuple
 ########################################## Add age #############################################
 class CellularAutomaton_modfied:
     """
-    Cellular Automaton simulator for forest fire propagation.
+    Cellular Automaton simulator for forest fire propagation by adding age-dependent inflammability.
 
     state_grid:
         0 = healthy
-        1 = burning / burnt in this simplified model
+        1 = burning / burnt
 
     age_grid:
         Fixed initial map chosen by the user.
@@ -75,6 +75,7 @@ class CellularAutomaton_modfied:
         Peterson-style age-dependent inflammability:
             p(age) = p_max * (age / t_max)^alpha_age   if age < t_max
                      p_max                              otherwise
+        t_max represents the age at which inflammability saturates. Before t_max, inflammability increases with age, and after t_max it remains constant at p_max. 
 
         Here it is used as a static susceptibility coefficient.
         """
@@ -120,11 +121,11 @@ class CellularAutomaton_modfied:
         #################################################### Add Humidity and Age #############################################
 class CellularAutomaton_humidity_age:
     """
-    Cellular Automaton simulator for forest fire propagation.
+    Cellular Automaton simulator for forest fire propagation modified with humidity and age effects.
 
     state_grid:
         0 = healthy
-        1 = burning / burnt in this simplified model
+        1 = burning / burnt
 
     age_grid:
         Fixed initial map chosen by the user.
@@ -136,7 +137,8 @@ class CellularAutomaton_humidity_age:
         Topographic effect function depending on delta_h.
 
     psi:
-        Moisture effect function depending on local moisture.
+        Moisture effect function depending on local moisture. It should return a value between 0 and 1 representing the dampening effect of moisture on fire spread.
+        psi should be a decreasing function of moisture, where psi(0) = 1 (no dampening when completely dry) and psi(max_moisture) = 0 (complete dampening when at maximum moisture).
     """
 
     def __init__(
@@ -210,6 +212,8 @@ class CellularAutomaton_humidity_age:
         return self.p_max
 
     def evolve(self, use_age: bool = True, use_moisture: bool = True) -> None:
+        """Evolve the cellular automaton by one time step, incorporating age and moisture effects.
+        If use_age is True, the age-dependent inflammability will be applied. If use_moisture is True, the moisture effect will be applied."""
         rows, cols = self.state_grid.shape
         next_grid = np.copy(self.state_grid)
 
