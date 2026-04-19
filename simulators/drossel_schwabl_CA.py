@@ -2,6 +2,7 @@ import random
 
 
 class DrosselSchwablForestFire:
+    """Automate cellulaire pour le modèle de Drossel-Schwabl de propagation d'incendie de forêt."""
     EMPTY = 0
     TREE = 1
     FIRE = 2
