@@ -73,14 +73,15 @@ class CellularAutomaton_modfied:
     def age_inflammability(self, age: float) -> float:
         """
         Peterson-style age-dependent inflammability:
-            p(age) = p_max * (age / t_max)^alpha_age   if age < t_max
-                     p_max                              otherwise
-        t_max represents the age at which inflammability saturates. Before t_max, inflammability increases with age, and after t_max it remains constant at p_max. 
+            p(age) = (1 + p_max)^((age / t_max)^alpha_age) - 1   if age < t_max
+                    p_max                                      otherwise
 
-        Here it is used as a static susceptibility coefficient.
+        t_max represents the age at which inflammability saturates.
+        Before t_max, inflammability increases slowly at first and then rapidly.
+        After t_max, it remains constant at p_max.
         """
         if age < self.t_max:
-            return self.p_max * (age / self.t_max) ** self.alpha_age
+            return (1 + self.p_max) ** ((age / self.t_max) ** self.alpha_age) - 1
         return self.p_max
 
     def evolve(self) -> None:
@@ -204,11 +205,15 @@ class CellularAutomaton_humidity_age:
     def age_inflammability(self, age: float) -> float:
         """
         Peterson-style age-dependent inflammability:
-            p(age) = p_max * (age / t_max)^alpha_age   if age < t_max
-                     p_max                              otherwise
+            p(age) = (1 + p_max)^((age / t_max)^alpha_age) - 1   if age < t_max
+                    p_max                                      otherwise
+
+        t_max represents the age at which inflammability saturates.
+        Before t_max, inflammability increases slowly at first and then rapidly.
+        After t_max, it remains constant at p_max.
         """
         if age < self.t_max:
-            return self.p_max * (age / self.t_max) ** self.alpha_age
+            return (1 + self.p_max) ** ((age / self.t_max) ** self.alpha_age) - 1
         return self.p_max
 
     def evolve(self, use_age: bool = True, use_moisture: bool = True) -> None:
