@@ -273,3 +273,39 @@ class FireMetrics:
     def summary(self, t: int, t_tilde: int, p: int = 2) -> dict[str, float]:
         """Return all metrics combined."""
         return {**self.all_shape_metrics(t, t_tilde, p=p), **self.all_spread_metrics()}
+    
+
+    @staticmethod
+    def aatd_from_maps(
+        T_P: np.ndarray,
+        T_G: np.ndarray,
+        unreachable_value: float = -1,
+    ) -> float:
+        """
+        Average Arrival Time Difference computed directly from two arrival-time maps.
+
+        Parameters
+        ----------
+        T_P : np.ndarray
+            Predicted arrival-time map.
+        T_G : np.ndarray
+            Ground-truth arrival-time map.
+        unreachable_value : float
+            Value used for cells never reached by fire in saved maps.
+            Default: -1.
+
+        Returns
+        -------
+        float
+            Mean absolute difference on cells reached in both maps.
+            Returns nan if there is no common reached cell.
+        """
+        T_P = np.asarray(T_P, dtype=float)
+        T_G = np.asarray(T_G, dtype=float)
+
+        valid = (T_P != unreachable_value) & (T_G != unreachable_value)
+
+        if not np.any(valid):
+            return float("nan")
+
+        return float(np.mean(np.abs(T_P[valid] - T_G[valid])))
