@@ -193,6 +193,13 @@ def combined_loss(pred_arrival, obs_arrival, n_steps, lambda_unburned=0.5):
     
     return loss_burned + lambda_unburned * loss_unburned
 
+def masked_mse(pred_arrival, obs_arrival, n_steps):
+    mask = obs_arrival >= 0
+    if mask.sum() == 0:
+        return torch.tensor(0.0)
+    pred_norm = pred_arrival[mask] / n_steps
+    obs_norm  = obs_arrival[mask].float() / n_steps
+    return torch.mean((pred_norm - obs_norm) ** 2)
 
 # 3 Training loop
 
@@ -218,7 +225,7 @@ def fit(model, fires_data, n_steps=100, n_epochs=150, lr=0.05, verbose=True):
             wind = torch.tensor(fire["wind_grid"],    dtype=torch.float32)
 
             pred = model(ig, wind, n_steps)
-            loss = combined_loss(pred, obs, n_steps)
+            loss = masked_mse(pred, obs, n_steps)
             total_loss = total_loss + loss
 
         total_loss = total_loss / len(fires_data)
@@ -245,7 +252,7 @@ def fit(model, fires_data, n_steps=100, n_epochs=150, lr=0.05, verbose=True):
 # 4 Diagnostic plot
 
 def plot_results(history, true_alpha, true_beta, true_gamma):
-    fig = plt.figure(figsize=(14, 4), facecolor="#0f0f0f")
+    fig = plt.figure(figsize=(14, 4))
     gs  = gridspec.GridSpec(1, 4, figure=fig, wspace=0.35)
 
     ax_loss  = fig.add_subplot(gs[0])
@@ -262,22 +269,18 @@ def plot_results(history, true_alpha, true_beta, true_gamma):
         (ax_beta,  "beta",  true_beta,  "β (moisture)"),
         (ax_gamma, "gamma", true_gamma, "γ (slope)"),
     ]:
-        ax.set_facecolor("black")
-        ax.spines[:].set_color("#333")
-        ax.tick_params(colors="#aaa", labelsize=8)
-        ax.set_xlabel("Epoch", color="#aaa", fontsize=8)
-        ax.set_title(label, color="#eee", fontsize=10, pad=8)
+        ax.tick_params(labelsize=8)
+        ax.set_xlabel("Epoch", fontsize=8)
+        ax.set_title(label, fontsize=10, pad=8)
 
         color = palette[key]
         ax.plot(epochs, history[key], color=color, lw=1.8)
 
         if true_val is not None:
-            ax.axhline(true_val, color="#fff", lw=1.2, ls="--", alpha=0.6, label=f"true={true_val}")
-            ax.legend(fontsize=7, labelcolor="#eee",
-                      facecolor="#111", edgecolor="#444")
+            ax.axhline(true_val, lw=1.2, ls="--", alpha=0.6, label=f"true={true_val}")
+            ax.legend(fontsize=7)
 
-    fig.suptitle("Soft CA — Gradient-Based Parameter Recovery",
-                 color="#eee", fontsize=13, y=1.02)
+    fig.suptitle("Soft CA — Gradient-Based Parameter Recovery", fontsize=13, y=1.02)
     plt.tight_layout()
     plt.savefig("recovery_plot.png", dpi=150,
                 bbox_inches="tight", facecolor=fig.get_facecolor())
