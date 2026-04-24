@@ -96,7 +96,6 @@ class FireMetrics:
         P, G = self.P[t], self.G[t_tilde]
         intersection = np.minimum(P, G).sum()
         union = np.maximum(P, G).sum()
-        print(union)
         if union == 0.0:
             return 1.0  # both grids are identically zero
         return float(intersection / union)
