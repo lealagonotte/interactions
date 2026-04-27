@@ -4,6 +4,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import contextily as cx
 from pathlib import Path
+from shapely.geometry import box
 
 
 def FireForestViz(fire_id: int) -> None:
@@ -75,6 +76,132 @@ def FireForestViz(fire_id: int) -> None:
 
     plt.tight_layout()
     plt.show()
+
+
+def generate_matrix_for_one_step(wildfire_id: int, step: int, bounds, resolution, gdf):
+    """
+    Generates a rasterized grid representing the burned area for a specific wildfire time step.
+
+    The function creates a matrix where each cell value represents the fraction of
+    the cell's area that has been burned, normalized between 0.0 and 1.0.
+
+    Args:
+        wildfire_id (int): Unique identifier of the wildfire.
+        step (int): The specific propagation step to process.
+        bounds (list): List of coordinates [minx, miny, maxx, maxy] defining the grid extent.
+        resolution (float): The size of each grid cell in map units.
+        gdf (GeoDataFrame): Spatial data containing wildfire geometries and attributes.
+
+    Returns:
+        np.ndarray: A 2D numpy array representing the burned intensity grid.
+    """
+
+    minx, miny, maxx, maxy = bounds
+    width = int((maxx - minx) / resolution)
+    height = int((maxy - miny) / resolution)
+
+    step_gdf = gdf[(gdf.wildfire_id == wildfire_id) & (gdf.prop_step == step)]
+
+    matrix = np.zeros((height, width))
+    cell_area = resolution**2
+
+    x_coords = np.arange(minx, maxx, resolution)
+    y_coords = np.arange(maxy, miny, -resolution)
+
+    for i, y in enumerate(y_coords):
+        for j, x in enumerate(x_coords):
+            cell = box(x, y - resolution, x + resolution, y)
+            inter = step_gdf.intersection(cell)
+            if not inter.is_empty.any():
+                area_burned = inter.area.sum()
+                matrix[i, j] = min(area_burned / cell_area, 1.0)
+
+    return matrix
+
+
+def generate_wildfire_propagation_grids(wildfire_id, margin, resolution, gdf):
+    """
+    Computes a sequence of propagation matrices for a given wildfire across all time steps.
+
+    This function determines the global bounding box of the wildfire (including a margin),
+    identifies all unique propagation steps, and generates a matrix for each step.
+
+    Args:
+        wildfire_id (int): Unique identifier of the wildfire.
+        margin (float): Extra space added around the wildfire's total bounds.
+        resolution (float): The size of each grid cell in map units.
+        gdf (GeoDataFrame): Spatial data containing wildfire geometries.
+
+    Returns:
+        list[np.ndarray]: A list of 2D numpy arrays, one for each propagation step.
+    """
+    minx = gdf[gdf.wildfire_id == wildfire_id].total_bounds[0] - margin
+    miny = gdf[gdf.wildfire_id == wildfire_id].total_bounds[1] - margin
+    maxx = gdf[gdf.wildfire_id == wildfire_id].total_bounds[2] + margin
+    maxy = gdf[gdf.wildfire_id == wildfire_id].total_bounds[3] + margin
+    steps_to_check = gdf[gdf.wildfire_id == wildfire_id].prop_step.unique()
+    bounds = [minx, miny, maxx, maxy]
+    matrices = []
+
+    for step in steps_to_check:
+        matrices.append(
+            generate_matrix_for_one_step(wildfire_id, step, bounds, resolution, gdf)
+        )
+    return matrices
+
+
+def plot_matrix_wildfire_propagation(liste_matrices, n_cols=3):
+    """
+    Visualizes the sequence of wildfire propagation matrices in a grid of subplots.
+
+    Each matrix is displayed using a color map (viridis) where values range from
+    0 (not burned) to 1 (fully burned).
+
+    Args:
+        liste_matrices (list[np.ndarray]): List of 2D numpy arrays to visualize.
+        n_cols (int, optional): Number of columns in the plot grid. Defaults to 3.
+
+    Returns:
+        None: Displays the plot using matplotlib.
+    """
+    n_images = len(liste_matrices)
+    n_rows = (n_images + n_cols - 1) // n_cols
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 4 * n_rows))
+    if n_rows == 1:
+        axes_flat = axes
+    else:
+        axes_flat = axes.flatten()
+
+    im = None
+    for i in range(len(axes_flat)):
+        if i < n_images:
+            im = axes_flat[i].imshow(liste_matrices[i], cmap="viridis", vmin=0, vmax=1)
+            axes_flat[i].set_title(f"Matrice {i}")
+        else:
+            axes_flat[i].axis("off")
+    fig.colorbar(im, ax=axes_flat.tolist(), shrink=0.6, label="Échelle [0, 1]")
+    plt.show()
+
+
+def FireForestVizMatrix(wildfire_id: int, margin: int, resolution: int, gdf) -> None:
+    """
+    Orchestrates the full pipeline to generate and visualize wildfire propagation grids.
+
+    This high-level function fetches the burned area data for a specific fire,
+    converts the spatial geometries into a sequence of intensity matrices based
+    on the provided resolution, and generates a comparative visualization.
+
+    Args:
+        wildfire_id (int): Unique identifier of the wildfire to visualize.
+        margin (int): Buffer distance added around the wildfire extent to provide context.
+        resolution (int): The spatial resolution (cell size) for the output matrices.
+
+    Returns:
+        None: This function outputs a Matplotlib plot directly.
+    """
+
+    matrices = generate_wildfire_propagation_grids(wildfire_id, margin, resolution, gdf)
+    plot_matrix_wildfire_propagation(matrices)
 
 
 if __name__ == "__main__":
