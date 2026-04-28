@@ -221,6 +221,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pillow-12.2.0-py314h8ec4b1a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pixman-0.46.4-h54a6638_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.9.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/pot-0.9.6.post1-py314ha0b5721_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.1-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/proj-9.7.1-he0df7b0_3.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/prometheus-cpp-1.3.0-ha5d0236_0.conda
@@ -481,6 +482,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/pillow-12.2.0-py314hc904d5e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.9.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/pot-0.9.6.post1-py314hc4308db_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.1-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/proj-9.7.1-h4aacef1_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/prometheus-cpp-1.3.0-h7802330_0.conda
@@ -717,6 +719,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pillow-12.2.0-py314hab283cf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.9.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pot-0.9.6.post1-py314ha3d490a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.1-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/proj-9.7.1-hfb14a63_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/prometheus-cpp-1.3.0-h0967b3e_0.conda
@@ -961,6 +964,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/pillow-12.2.0-py314h61b30b5_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/pixman-0.46.4-h5112557_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/platformdirs-4.9.4-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/pot-0.9.6.post1-py314hd8fd7ce_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.1-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/proj-9.7.1-hd30e2cd_3.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/prometheus-cpp-1.3.0-hcea2f5d_0.conda
@@ -8735,6 +8739,69 @@ packages:
   license_family: MIT
   size: 25646
   timestamp: 1773199142345
+- conda: https://conda.anaconda.org/conda-forge/linux-64/pot-0.9.6.post1-py314ha0b5721_0.conda
+  sha256: 2a43cf8d544f7092239279a275e7e7db4df7e613f640d75fd6627f5f28500158
+  md5: 815d5d0d49a9b93f623222a0f4dc34f2
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=14
+  - libstdcxx >=14
+  - matplotlib-base >=1.5
+  - numpy >=1.23,<3
+  - python >=3.14.0rc3,<3.15.0a0
+  - python_abi 3.14.* *_cp314
+  - scipy >=1.0
+  license: MIT
+  license_family: MIT
+  size: 667513
+  timestamp: 1758609729296
+- conda: https://conda.anaconda.org/conda-forge/osx-64/pot-0.9.6.post1-py314hc4308db_0.conda
+  sha256: f412e1843238782cfd20620b855b3d64c374a9d7455135d8624618551b50d48e
+  md5: 25dc9c81d179b3d236e3ab6a53326f78
+  depends:
+  - __osx >=10.13
+  - libcxx >=19
+  - matplotlib-base >=1.5
+  - numpy >=1.23,<3
+  - python >=3.14.0rc3,<3.15.0a0
+  - python_abi 3.14.* *_cp314
+  - scipy >=1.0
+  license: MIT
+  license_family: MIT
+  size: 647082
+  timestamp: 1758610093234
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/pot-0.9.6.post1-py314ha3d490a_0.conda
+  sha256: 1cae7b007e14214b61cd473177b4bb7cbb8f3fdb5f97bd0ae2e33fc885da13b1
+  md5: a74a3c5b6f81a9a16ac84e1bfa292952
+  depends:
+  - __osx >=11.0
+  - libcxx >=19
+  - matplotlib-base >=1.5
+  - numpy >=1.23,<3
+  - python >=3.14.0rc3,<3.15.0a0
+  - python >=3.14.0rc3,<3.15.0a0 *_cp314
+  - python_abi 3.14.* *_cp314
+  - scipy >=1.0
+  license: MIT
+  license_family: MIT
+  size: 639680
+  timestamp: 1758609930467
+- conda: https://conda.anaconda.org/conda-forge/win-64/pot-0.9.6.post1-py314hd8fd7ce_0.conda
+  sha256: 3bc9fd0ae2d1e9795b9585a640e3a32c3dde7f8b1355cb2e7b9bbd32264505c0
+  md5: a591845386c017c80fb162afe0224717
+  depends:
+  - matplotlib-base >=1.5
+  - numpy >=1.23,<3
+  - python >=3.14.0rc3,<3.15.0a0
+  - python_abi 3.14.* *_cp314
+  - scipy >=1.0
+  - ucrt >=10.0.20348.0
+  - vc >=14.3,<15
+  - vc14_runtime >=14.44.35208
+  license: MIT
+  license_family: MIT
+  size: 632242
+  timestamp: 1758610156257
 - conda: https://conda.anaconda.org/conda-forge/noarch/pre-commit-4.5.1-pyha770c72_0.conda
   sha256: 5b81b7516d4baf43d0c185896b245fa7384b25dc5615e7baa504b7fa4e07b706
   md5: 7f3ac694319c7eaf81a0325d6405e974

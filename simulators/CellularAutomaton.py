@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Optional
 
 
 class CellularAutomaton:
@@ -24,6 +24,7 @@ class CellularAutomaton:
         wind_grid: np.ndarray,
         height_grid: np.ndarray,
         phi: Callable[[float], float],
+        burnable_mask: Optional[np.ndarray] = None,
     ) -> None:
         self.state_grid = np.zeros((grid_height, grid_width))
         self.neighborhood = [
@@ -40,6 +41,10 @@ class CellularAutomaton:
         self.wind_grid = wind_grid
         self.height_grid = height_grid
         self.phi = phi
+        if burnable_mask is None:
+            self.burnable_mask = np.ones((grid_height, grid_width))
+        else:
+            self.burnable_mask = burnable_mask
 
     def __repr__(self) -> str:
         h, w = self.state_grid.shape
@@ -62,26 +67,30 @@ class CellularAutomaton:
 
         for i in range(rows):
             for j in range(cols):
+                if self.burnable_mask[i, j] == 0:
+                    next_grid[i, j] = 0
+                    continue
+
                 total_influence = 0
-
                 for di, dj in self.neighborhood:
-                    if di == 0 and dj == 0:
-                        continue
-
                     ni, nj = i + di, j + dj
 
                     if 0 <= ni < rows and 0 <= nj < cols:
-                        dist_coeff = 0.83 if abs(di) + abs(dj) == 2 else 1.0
-                        s_neighbor = self.state_grid[ni, nj]
-                        delta_h = self.height_grid[i, j] - self.height_grid[ni, nj]
-                        h_influence = self.phi(delta_h)
-
-                        total_influence += (
-                            dist_coeff
-                            * self.wind_grid[ni, nj]
-                            * h_influence
-                            * s_neighbor
+                        s_neighbor_effective = (
+                            self.state_grid[ni, nj] * self.burnable_mask[ni, nj]
                         )
+
+                        if s_neighbor_effective > 0:
+                            dist_coeff = 0.83 if abs(di) + abs(dj) == 2 else 1.0
+                            delta_h = self.height_grid[i, j] - self.height_grid[ni, nj]
+                            h_influence = self.phi(delta_h)
+
+                            total_influence += (
+                                dist_coeff
+                                * self.wind_grid[ni, nj]
+                                * h_influence
+                                * s_neighbor_effective
+                            )
 
                 next_grid[i, j] = self.state_grid[i, j] + total_influence
 
