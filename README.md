@@ -17,7 +17,7 @@ At the **microscopic scale**, we focus on the propagation of a single fire event
 - Extension of the basic models with environmental parameters such as vegetation age and moisture.
 - Calibration experiments on synthetic and real data for fire-spread prediction.
 
-# Architecture du code
+## Code architecture
 ```text
 interactions-main/
 ├── cell_auto_documents/          
