@@ -3,17 +3,17 @@ import numpy as np
 from collections import deque
 
 class DrosselSchwablForestFire:
-    """Automate cellulaire pour le modèle de Drossel-Schwabl de propagation d'incendie de forêt."""
+    """CA of Drossel-Schwabl Forest Fire Model with von Neumann neighborhood."""
     EMPTY = 0
     TREE = 1
     FIRE = 2
 
     def __init__(self, width, height, p=0.01, f=0.0001, initial_tree_density=0.6):
         """
-        width, height : dimensions de la grille
-        p : probabilité de pousse d'un arbre sur une case vide
-        f : probabilité qu'un arbre prenne feu spontanément
-        initial_tree_density : densité initiale d'arbres
+        width, height : grid dimensions
+        p : probability that an empty cell grows a tree
+        f : probability that a tree spontaneously ignites
+        initial_tree_density : initial proportion of cells that are trees at the start of the simulation
         """
         self.width = width
         self.height = height
@@ -29,7 +29,7 @@ class DrosselSchwablForestFire:
         ]
 
     def _neighbors_on_fire(self, x, y):
-        """Voisinage de von Neumann : haut, bas, gauche, droite."""
+        """ von Neumann neighbourhood: up, down, left, right."""
         for dx, dy in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.width and 0 <= ny < self.height:
@@ -38,7 +38,7 @@ class DrosselSchwablForestFire:
         return False
 
     def step(self):
-        """Fait avancer le système d'un pas de temps."""
+        """Update the grid according to the rules of the model."""
         new_grid = [[self.EMPTY for _ in range(self.width)] for _ in range(self.height)]
 
         for y in range(self.height):
@@ -46,19 +46,17 @@ class DrosselSchwablForestFire:
                 cell = self.grid[y][x]
 
                 if cell == self.FIRE:
-                    # Le feu devient vide
                     new_grid[y][x] = self.EMPTY
 
                 elif cell == self.TREE:
-                    # brûle si un voisin brûle
-                    # ou feu spontané avec probabilité f
+
                     if self._neighbors_on_fire(x, y) or random.random() < self.f:
                         new_grid[y][x] = self.FIRE
                     else:
                         new_grid[y][x] = self.TREE
 
                 else:  # EMPTY
-                    # pousse d'un arbre avec probabilité p
+
                     if random.random() < self.p:
                         new_grid[y][x] = self.TREE
                     else:
@@ -67,7 +65,7 @@ class DrosselSchwablForestFire:
         self.grid = new_grid
 
     def ignite_random_tree(self):
-        """Allume un arbre aléatoirement au début de la simulation pour démarrer un feu."""
+        """Ignite a random tree in the grid (useful to start the fire if there are no spontaneous ignitions)."""
         trees = [
             (x, y)
             for y in range(self.height)
@@ -79,7 +77,7 @@ class DrosselSchwablForestFire:
             self.grid[y][x] = self.FIRE
 
     def count_burning(self):
-        """Nombre de cellules actuellement en feu."""
+        """Number of burning trees in the grid."""
         return sum(cell == self.FIRE for row in self.grid for cell in row)
 
   ################################################ Second implementation #############################""
@@ -95,23 +93,23 @@ BURNING = 2
 class DrosselSchwablFFM:
     def __init__(self, L, theta, fixed="p", p=None, f=None, seed=None):
         """
-        Modèle de Drossel-Schwabl Forest Fire Model.
+        Drossel-Schwabl Forest Fire Model with von Neumann neighborhood.    
 
-        Paramètres
+        Paramters
         ----------
         L : int
-            Taille du paysage carré L x L.
+            Grid size (LxL).
         theta : float
-            Rapport theta = p / f.
+            p/f ratio, mean number of growth attempts per ignition.
         fixed : str
-            "p" si on fixe p et on calcule f.
-            "f" si on fixe f et on calcule p.
+            "p" if we fix p and compute f,
+            "f" if we fix f and compute p.
         p : float
-            Probabilité de croissance si fixed="p".
+            probaility of tree growth if fixed="p".
         f : float
-            Probabilité d'ignition si fixed="f".
+            probability of spontaneous ignition if fixed="f".
         seed : int, optionnel
-            Graine aléatoire.
+            
         """
 
         if seed is not None:
@@ -124,24 +122,24 @@ class DrosselSchwablFFM:
 
         if fixed == "p":
             if p is None:
-                raise ValueError("Il faut donner p quand fixed='p'.")
+                raise ValueError("You must give p.")
             self.p = p
             self.f = p / theta
 
         elif fixed == "f":
             if f is None:
-                raise ValueError("Il faut donner f quand fixed='f'.")
+                raise ValueError("You must give f.")
             self.f = f
             self.p = theta * f
 
         else:
-            raise ValueError("fixed doit être 'p' ou 'f'.")
+            raise ValueError("fixed must be f or p.")
 
         if not (0 <= self.p <= 1):
-            raise ValueError(f"p doit être dans [0,1]. Ici p={self.p}")
+            raise ValueError(f"p should be in [0,1]. Ici p={self.p}")
 
         if not (0 <= self.f <= 1):
-            raise ValueError(f"f doit être dans [0,1]. Ici f={self.f}")
+            raise ValueError(f"f should be in[0,1]. Ici f={self.f}")
 
         self.grid = np.zeros((L, L), dtype=np.int8)
 
@@ -156,8 +154,8 @@ class DrosselSchwablFFM:
 
     def neighbors(self, i, j):
         """
-        Voisinage de von Neumann : haut, bas, gauche, droite.
-        Conditions périodiques.
+       von Neumann's neighbourhood .
+
         """
         L = self.L
         return [
@@ -169,8 +167,7 @@ class DrosselSchwablFFM:
 
     def fire_spread(self, start_i, start_j):
         """
-        Brûle tout le cluster connecté d'arbres contenant la cellule initiale.
-        Retourne la taille du feu.
+        BFS to spread the fire from the initial cell (start_i, start_j) and count how many trees are burned.
         """
         if self.grid[start_i, start_j] != TREE:
             return 0
@@ -197,14 +194,12 @@ class DrosselSchwablFFM:
 
     def step_grassberger(self):
         """
-        Une étape de simulation selon l'algorithme :
+        One step of the simulation following Grassberger's algorithm:
+        1. Randomly select a cell.  If it's a tree, ignite it and spread the fire.
+        2. Randomly select cells to grow new trees according to the growth probability p.
 
-        1. choisir une cellule au hasard ;
-        2. si c'est un arbre, déclencher FireSpread ;
-        3. faire theta tentatives de croissance.
         """
 
-        # Étape feu
         i, j = self.random_cell()
 
         if self.grid[i, j] == TREE:
@@ -212,8 +207,6 @@ class DrosselSchwablFFM:
         else:
             fire_size = 0
 
-        # Étape croissance
-        # Si theta n'est pas entier, on utilise une version stochastique.
         n_growth_attempts = int(self.theta)
         fractional_part = self.theta - n_growth_attempts
 
@@ -233,19 +226,19 @@ class DrosselSchwablFFM:
 
     def run(self, steps, burn_in=0):
         """
-        Lance la simulation.
+        Run the simulation for a given number of steps and return the fire sizes and tree densities after burn-in.
 
-        Paramètres
+        Parameters
         ----------
         steps : int
-            Nombre total d'étapes.
+            Number of steps to run the simulation.
         burn_in : int
-            Nombre d'étapes initiales à ignorer dans les résultats.
+            Number of initial steps to discard as burn-in.
 
         Retourne
         --------
         dict
-            Tailles de feux et densités après burn-in.
+            Fire sizes, tree densities, final grid state, and model parameters after running the simulation.
         """
 
         for _ in range(steps):
